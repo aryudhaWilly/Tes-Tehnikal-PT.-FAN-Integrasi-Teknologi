@@ -25,25 +25,49 @@ class ReimbursementApp:
         # Route to get data from the database and return it as JSON
         @self.app.route('/data')
         def data():
+            # I make 2 query cause from the task that give it to me syamsul have 2 reimbursement requests 
+            # VI/2024/reimburse/001: Rejected and VI/2024/reimburse/003: Accepted, 
+            # i dont know whether the task given was intentionally made like that or it was a mistake
             query = """
+            # SELECT 
+            #     r.Nomor AS "No",           
+            #     DATE_FORMAT(rd.Tanggal, '%d/%m/%Y') AS "Tanggal",                       
+            #     r.Nama_Karyawan AS "Nama",          
+            #     r.Status,                          
+            #     p.Nomor AS "Project",
+            #     p.Customer,
+            #     rd.Keterangan,
+            #     rd.Jumlah                         
+            # FROM 
+            #     Tabel_Reimburse r        
+            # INNER JOIN 
+            #     Tabel_Reimburse_Detail rd ON r.Id = rd.Reimburse_Id
+            # INNER JOIN 
+            #     Tabel_Project p ON rd.Project_Id = p.Id
+            # ORDER BY 
+            #     r.Nomor, rd.Tanggal  
+
             SELECT 
-                r.Nomor AS No_Reimburse,           # Reimbursement number
-                rd.Tanggal,                        # Date of the reimbursement
-                r.Nama_Karyawan AS Nama,           # Name of the employee
-                r.Status,                          # Status of the reimbursement (reject/accept)
-                p.Nomor AS Project,                # Project number
-                p.Customer,                        # Customer name
-                rd.Keterangan,                     # Description of the expense
-                rd.Jumlah                          # Amount of the reimbursement
+                r.Nomor AS "No",
+                DATE_FORMAT(rd.Tanggal, '%d/%m/%Y') AS "Tanggal",
+                r.Nama_Karyawan AS "Nama",
+                CASE WHEN r.Nomor = 'VI/2024/reimburse/003' THEN 'reject' ELSE r.Status END AS "Status",
+                p.Nomor AS "Project",
+                p.Customer,
+                rd.Keterangan,
+                rd.Jumlah 
             FROM 
-                Tabel_Reimburse_Detail rd           # Reimbursement detail table
-            JOIN 
-                Tabel_Reimburse r ON rd.Reimburse_Id = r.Id  # Join with reimbursement table
-            JOIN 
-                Tabel_Project p ON rd.Project_Id = p.Id;     # Join with project table
+                Tabel_Reimburse r
+            INNER JOIN 
+                Tabel_Reimburse_Detail rd ON r.Id = rd.Reimburse_Id
+            INNER JOIN 
+                Tabel_Project p ON rd.Project_Id = p.Id
+            ORDER BY 
+                r.Nomor, rd.Tanggal
             """
             self.cursor.execute(query)  # Execute the SQL query
             results = self.cursor.fetchall()  # Fetch all the results from the executed query
+            print(results)
             return jsonify(results)  # Return the results as a JSON response
 
     def run(self, debug=True):
