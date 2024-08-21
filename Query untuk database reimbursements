@@ -1,0 +1,72 @@
+-- 1. Create the database named 'reimbursements'
+CREATE DATABASE reimbursements;
+
+-- 2. Use the 'reimbursements' database
+USE reimbursements;
+
+-- 3. Create the 'Tabel_Akun' table to store account details
+CREATE TABLE Tabel_Akun (
+    Id INT AUTO_INCREMENT PRIMARY KEY,  -- Unique ID for each account (auto-incremented)
+    Kode VARCHAR(10),                   -- Code representing the account
+    Jenis VARCHAR(50),                  -- Type of account (e.g., reimburse)
+    Name VARCHAR(100)                   -- Name of the account
+);
+
+-- 4. Insert initial data into 'Tabel_Akun' for different account types
+INSERT INTO Tabel_Akun (Kode, Jenis, Name) VALUES 
+('1.0.0', 'reimburse', 'entertainment'),  -- Entertainment account
+('2.0.0', 'reimburse', 'transportasi'),   -- Transportation account
+('3.0.0', 'reimburse', 'konsumsi');       -- Consumption account
+
+-- 5. Create the 'Tabel_Project' table to store project details
+CREATE TABLE Tabel_Project (
+    Id INT AUTO_INCREMENT PRIMARY KEY,  -- Unique ID for each project (auto-incremented)
+    Nomor VARCHAR(50),                  -- Project number
+    Name VARCHAR(100),                  -- Name of the project
+    Customer VARCHAR(100),              -- Customer associated with the project
+    Mulai DATE,                         -- Start date of the project
+    Selesai DATE                        -- End date of the project
+);
+
+-- 6. Insert initial data into 'Tabel_Project' for different projects
+INSERT INTO Tabel_Project (Nomor, Name, Customer, Mulai, Selesai) VALUES 
+('I/2024/sejahtera', 'Development compro', 'PT Sejahtera Abadi', '2024-01-01', '2024-12-01'),  -- First project
+('III/2024/sejahtera', 'Development HRIS', 'PT Sejahtera Abadi', '2024-03-01', '2024-06-01');  -- Second project
+
+-- 7. Create the 'Tabel_Reimburse' table to store reimbursement request details
+CREATE TABLE Tabel_Reimburse (
+    Id INT AUTO_INCREMENT PRIMARY KEY,  -- Unique ID for each reimbursement request (auto-incremented)
+    Nomor VARCHAR(50),                  -- Reimbursement request number
+    Nama_Karyawan VARCHAR(100),         -- Name of the employee requesting reimbursement
+    Email VARCHAR(100),                 -- Email of the employee
+    Status ENUM('reject', 'accept')     -- Status of the reimbursement request (reject/accept)
+);
+
+-- 8. Insert initial data into 'Tabel_Reimburse' for different reimbursement requests
+INSERT INTO Tabel_Reimburse (Nomor, Nama_Karyawan, Email, Status) VALUES 
+('V/2024/reimburse/001', 'Syamsul', 'syamsul@gmail.com', 'reject'),  -- Reimbursement rejected for Syamsul
+('VI/2024/reimburse/002', 'Deborah', 'deborah@gmail.com', 'accept'), -- Reimbursement accepted for Deborah
+('VI/2024/reimburse/003', 'Syamsul', 'syamsul@gmail.com', 'accept'); -- Reimbursement accepted for Syamsul
+
+-- 9. Create the 'Tabel_Reimburse_Detail' table to store detailed information about each reimbursement
+CREATE TABLE Tabel_Reimburse_Detail (
+    Id INT AUTO_INCREMENT PRIMARY KEY,  -- Unique ID for each reimbursement detail (auto-incremented)
+    Reimburse_Id INT,                   -- Foreign key referencing 'Tabel_Reimburse' Id
+    Akun_Id INT,                        -- Foreign key referencing 'Tabel_Akun' Id
+    Keterangan VARCHAR(255),            -- Description of the reimbursement expense
+    Project_Id INT,                     -- Foreign key referencing 'Tabel_Project' Id
+    Tanggal DATE,                       -- Date of the reimbursement expense
+    Jumlah DECIMAL(15, 2),              -- Amount of the reimbursement
+    FOREIGN KEY (Reimburse_Id) REFERENCES Tabel_Reimburse(Id),  -- Link to 'Tabel_Reimburse'
+    FOREIGN KEY (Akun_Id) REFERENCES Tabel_Akun(Id),            -- Link to 'Tabel_Akun'
+    FOREIGN KEY (Project_Id) REFERENCES Tabel_Project(Id)       -- Link to 'Tabel_Project'
+);
+
+-- 10. Insert initial data into 'Tabel_Reimburse_Detail' for detailed reimbursement records
+INSERT INTO Tabel_Reimburse_Detail (Reimburse_Id, Akun_Id, Keterangan, Project_Id, Tanggal, Jumlah) VALUES 
+(1, 3, 'karaoke dengan client', 1, '2024-05-15', 1000000.00),          -- Reimbursement for karaoke with a client
+(2, 3, 'konsumsi makan siangcleint', 2, '2024-06-02', 500000.00),      -- Reimbursement for lunch with a client
+(2, 1, 'konsumsi makan malam client', 2, '2024-06-02', 750000.00),     -- Reimbursement for dinner with a client
+(2, 1, 'konsumsi lembur tim', 2, '2024-06-02', 350000.00),             -- Reimbursement for team overtime meal
+(3, 2, 'gojek pergi ke sosialisasi', 1, '2024-06-10', 25000.00),       -- Reimbursement for Gojek to socialization event
+(3, 2, 'gojek pulang dari sosialisasi', 1, '2024-06-10', 20000.00);    -- Reimbursement for Gojek from socialization event
